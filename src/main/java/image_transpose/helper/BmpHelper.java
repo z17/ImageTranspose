@@ -6,8 +6,20 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BmpHelper {
+
+    public static List<Pixel[][]> readFiles(List<String> names) {
+        List<Pixel[][]> result = new ArrayList<>();
+        for (String name : names) {
+            result.add(readFile(name));
+        }
+        return result;
+    }
 
     public static Pixel[][] readFile(final String name) {
         try {
@@ -51,6 +63,19 @@ public class BmpHelper {
             ImageIO.write(img, "BMP", new File(name));
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public static void writeFiles(final List<Pixel[][]> images, final String folder, final String prefix) {
+        try {
+            Files.createDirectories(Paths.get(folder));
+            int i = 0;
+            for (Pixel[][] image : images) {
+                writeFile(folder + "/" + prefix + "_" + i + ".bmp", image);
+                i++;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
