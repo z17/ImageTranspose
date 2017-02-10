@@ -9,7 +9,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
 public class BmpHelper {
 
@@ -39,6 +41,32 @@ public class BmpHelper {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static Integer[][] readFileColor(final String name, final Color color) {
+        Pixel[][] pixels = readFile(name);
+        int cols = cols(pixels);
+        int rows = rows(pixels);
+        Integer[][] colors = new Integer[rows][cols];
+
+        for (int c = 0; c < cols; c ++) {
+            for (int r = 0; r < cols; r++) {
+                colors[c][r] = color.getColor.apply(pixels[c][r]);
+            }
+        }
+        return colors;
+    }
+
+    public static Integer[][] readFileRed(final String name) {
+        return readFileColor(name, Color.R);
+    }
+
+    public static Integer[][] readFileBlue(final String name) {
+        return readFileColor(name, Color.B);
+    }
+
+    public static Integer[][] readFileGreen(final String name) {
+        return readFileColor(name, Color.G);
     }
 
     public static void writeFile(final String name, final Pixel[][] pixels) {
@@ -76,6 +104,29 @@ public class BmpHelper {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static <T> int cols(T[][] matrix) {
+        long count = Arrays.stream(matrix).map(array -> array.length).distinct().count();
+        if (count > 1) {
+            throw new IllegalArgumentException("Not a matrix");
+        }
+        return matrix[0].length;
+    }
+
+    public static <T> int rows(T[][] matrix) {
+        return matrix.length;
+    }
+
+    private enum Color {
+        R(Pixel::getR),
+        G(Pixel::getG),
+        B(Pixel::getB);
+
+        public Function<Pixel, Integer> getColor;
+        Color(Function<Pixel, Integer> supplier) {
+            this.getColor = supplier;
         }
     }
 }
