@@ -32,6 +32,7 @@ public final class MathHelper {
         double[] doubles = Arrays.stream(a).mapToDouble(v -> v).toArray();
         return iccft(doubles);
     }
+
     public static Complex[] iccft(Double[] a) {
         double[] doubles = Arrays.stream(a).mapToDouble(v -> v).toArray();
         return iccft(doubles);
@@ -50,7 +51,24 @@ public final class MathHelper {
     public static Double[] minus(Double[] a, Double[] b) {
         Double[] res = new Double[a.length];
         for (int i = 0; i < a.length; i++) {
-            res[i] = a[i]-b[i];
+            res[i] = a[i] - b[i];
+        }
+        return res;
+    }
+
+    public static Double[][] augument(Double[][]... args) {
+        int cols = FunctionHelper.cols(args[0]);
+        int rows = FunctionHelper.rows(args[0]);
+
+        int newCols = cols * args.length;
+
+        Double[][] res = new Double[rows][newCols];
+
+        int currentStartCol = 0;
+        for (Double[][] m : args) {
+            for (int i = 0; i < rows; i++) {
+                System.arraycopy(m[i], 0, res[i], currentStartCol * cols, cols);
+            }
         }
         return res;
     }

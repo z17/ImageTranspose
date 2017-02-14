@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
@@ -45,13 +44,13 @@ public class BmpHelper {
 
     private static Integer[][] readFileColor(final String name, final Color color) {
         Pixel[][] pixels = readFile(name);
-        int cols = cols(pixels);
-        int rows = rows(pixels);
+        int cols = FunctionHelper.cols(pixels);
+        int rows = FunctionHelper.rows(pixels);
         Integer[][] colors = new Integer[rows][cols];
 
-        for (int c = 0; c < cols; c ++) {
-            for (int r = 0; r < cols; r++) {
-                colors[c][r] = color.getColor.apply(pixels[c][r]);
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                colors[i][j] = color.getColor.apply(pixels[i][j]);
             }
         }
         return colors;
@@ -107,26 +106,34 @@ public class BmpHelper {
         }
     }
 
-    public static <T> int cols(T[][] matrix) {
-        long count = Arrays.stream(matrix).map(array -> array.length).distinct().count();
-        if (count > 1) {
-            throw new IllegalArgumentException("Not a matrix");
-        }
-        return matrix[0].length;
-    }
-
-    public static <T> int rows(T[][] matrix) {
-        return matrix.length;
-    }
-
     private enum Color {
         R(Pixel::getR),
         G(Pixel::getG),
         B(Pixel::getB);
 
         public Function<Pixel, Integer> getColor;
+
         Color(Function<Pixel, Integer> supplier) {
             this.getColor = supplier;
         }
+    }
+
+    public static Pixel[][] convertToPixels(Double[][] r, Double[][] g, Double[][] b) {
+        int cols = FunctionHelper.cols(r);
+        int rows = FunctionHelper.rows(r);
+
+
+        Pixel[][] res = new Pixel[rows][cols];
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                res[i][j] = new Pixel(
+                        r[i][j].intValue(),
+                        g[i][j].intValue(),
+                        b[i][j].intValue()
+                );
+            }
+        }
+        return res;
     }
 }

@@ -1,12 +1,11 @@
 package image_transpose.helper;
 
 import org.apache.commons.math3.complex.Complex;
-import sun.plugin.javascript.navig.Array;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
 
 public final class FunctionHelper {
 
@@ -34,6 +33,7 @@ public final class FunctionHelper {
         }
         return result;
     }
+
     public static List<Double> Im(Complex[] sig) {
         List<Double> result = new ArrayList<>(sig.length);
         for (Complex s : sig) {
@@ -43,6 +43,31 @@ public final class FunctionHelper {
     }
 
     public static Double mean(List<Double> array) {
-        return array.stream().reduce(0D, (a, b) -> a+b ) / array.size();
+        return array.stream().reduce(0D, (a, b) -> a + b) / array.size();
+    }
+
+    public static Double[][] convertToDouble(Integer[][] array) {
+        int cols = cols(array);
+        int rows = rows(array);
+
+        Double[][] res = new Double[rows][cols];
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                res[i][j] = array[i][j].doubleValue();
+            }
+        }
+        return res;
+    }
+
+    public static <T> int cols(T[][] matrix) {
+        long count = Arrays.stream(matrix).map(array -> array.length).distinct().count();
+        if (count > 1) {
+            throw new IllegalArgumentException("Not a matrix");
+        }
+        return matrix[0].length;
+    }
+
+    public static <T> int rows(T[][] matrix) {
+        return matrix.length;
     }
 }

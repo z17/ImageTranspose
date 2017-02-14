@@ -4,7 +4,6 @@ import image_transpose.helper.BmpHelper;
 import image_transpose.helper.FunctionHelper;
 import image_transpose.helper.MathHelper;
 import org.apache.commons.math3.analysis.function.Gaussian;
-import org.apache.commons.math3.analysis.integration.gauss.GaussIntegrator;
 import org.apache.commons.math3.complex.Complex;
 
 import java.util.Arrays;
@@ -13,6 +12,7 @@ import java.util.List;
 public class Ogibs {
 
     private static void g1(int scale, int shift) {
+        // todo: check this
         int mean = 5;
         Gaussian gaussian = new Gaussian(mean, 0.7);
         for (int i = 0; i <= mean * 2; i++) {
@@ -23,40 +23,58 @@ public class Ogibs {
 
     public static void main(String[] args) {
         g1(200, 4);
+
+        Ogibs ogibs = new Ogibs();
+
+        ogibs.getOgibs(
+                "tmp/outpilot1_/",
+                "tmp/outpilot1__/",
+                "tmp/outpilot1__b/",
+                "tmp/outpilot1__ph/",
+                0,
+                14,
+                64,
+                2,
+                4,
+                60,
+                0.2,
+                0.015,
+                0.005
+        );
     }
 
     public void getOgibs(
             String dirt,
-            String dir2,
+            String dirt2,
             String dirt2b,
-            String dirt2bh,
+            String dirt2ph,
             int num,
             int mean1,
             int mean2,
             int dm1,
             int dm2,
             int ctrn,
-            int rrk,
-            int rrkb,
-            int rrkb2
+            double rrk,
+            double rrkb,
+            double rrkb2
     ) {
         String name = dirt + num + ".bmp";
         System.err.println("reading " + name);
-        Integer[][] r = BmpHelper.readFileRed(name);
-        Integer[][] g = BmpHelper.readFileGreen(name);
-        Integer[][] b = BmpHelper.readFileBlue(name);
-        Integer[][] r1 = r.clone();
-        Integer[][] g1 = r.clone();
-        Integer[][] b1 = r.clone();
-        Integer[][] r1b = r.clone();
-        Integer[][] g1b = r.clone();
-        Integer[][] b1b = r.clone();
-        Integer[][] r1bh = r.clone();
-        Integer[][] g1bh = r.clone();
-        Integer[][] b1bh = r.clone();
+        Double[][] r = FunctionHelper.convertToDouble(BmpHelper.readFileRed(name));
+        Double[][] g = FunctionHelper.convertToDouble(BmpHelper.readFileGreen(name));
+        Double[][] b = FunctionHelper.convertToDouble(BmpHelper.readFileBlue(name));
+        Double[][] r1 = r.clone();
+        Double[][] g1 = r.clone();
+        Double[][] b1 = r.clone();
+        Double[][] r1b = r.clone();
+        Double[][] g1b = r.clone();
+        Double[][] b1b = r.clone();
+        Double[][] r1ph = r.clone();
+        Double[][] g1ph = r.clone();
+        Double[][] b1ph = r.clone();
 
-        int X = BmpHelper.cols(r);
-        int YN = BmpHelper.rows(r);
+        int X = FunctionHelper.cols(r);
+        int YN = FunctionHelper.rows(r);
         for (int x = 0; x <= X - 1; x++) {
             if (x % 20 == 0) {
                 System.out.println("num = " + num + ", x = " + x + "/" + X);
@@ -66,9 +84,9 @@ public class Ogibs {
             Double[] g0 = new Double[YN];
             Double[] b0 = new Double[YN];
             for (int yn = 0; yn < YN; yn++) {
-                r0[yn] = Double.valueOf(r[yn][x]);
-                g0[yn] = Double.valueOf(g[yn][x]);
-                b0[yn] = Double.valueOf(b[yn][x]);
+                r0[yn] = r[yn][x];
+                g0[yn] = g[yn][x];
+                b0[yn] = b[yn][x];
             }
 
             List<Double[]> temp1 = get_og2(r0, mean1, mean2, dm1, dm2, rrk, rrkb, rrkb2);
@@ -95,12 +113,52 @@ public class Ogibs {
 
                 r1[yn][x] = res;
 
+                res = g32[yn] * ctrn;
+                if (res < 0) {
+                    res = 0;
+                }
+                if (res > 255) {
+                    res = 255;
+                }
+
+                g1[yn][x] = res;
+
+                res = b32[yn] * ctrn;
+                if (res < 0) {
+                    res = 0;
+                }
+                if (res > 255) {
+                    res = 255;
+                }
+
+                b1[yn][x] = res;
+
+                r1b[yn][x] = r32b[yn];
+                g1b[yn][x] = g32b[yn];
+                b1b[yn][x] = b32b[yn];
+                r1ph[yn][x] = r32ph[yn];
+                g1ph[yn][x] = g32ph[yn];
+                b1ph[yn][x] = b32ph[yn];
             }
         }
 
+        Pixel[][] rgb1 = BmpHelper.convertToPixels(r1, g1, b1);
+        String name1 = dirt2 + num + "___test.bmp";
+        System.out.println("saving " + name1);
+        BmpHelper.writeFile(name1, rgb1);
+
+        Pixel[][] rgb2 = BmpHelper.convertToPixels(r1b, g1b, b1b);
+        String name2 = dirt2b + num + "___test.bmp";
+        System.out.println("saving " + name2);
+        BmpHelper.writeFile(name2, rgb2);
+
+        Pixel[][] rgb3 = BmpHelper.convertToPixels(r1ph, g1ph, b1ph);
+        String name3 = dirt2ph + num + "___test.bmp";
+        System.out.println("saving " + name3);
+        BmpHelper.writeFile(name3, rgb3);
     }
 
-    private List<Double[]> get_og2(Double[] s1Temp, int mean1, int mean2, int dm1, int dm2, int rrk, int rrkb, int rrkb2) {
+    private List<Double[]> get_og2(Double[] s1Temp, int mean1, int mean2, int dm1, int dm2, double rrk, double rrkb, double rrkb2) {
         int N = s1Temp.length;
         Double[] s1 = sig_cfft_rec2(s1Temp, rrk);
         Double[] sm1 = sig_cfft_rec2(s1Temp, rrkb);
@@ -142,18 +200,19 @@ public class Ogibs {
         return f;
     }
 
-    private Double[] sig_cfft_rec2(Double[] s1Temp, int rrk) {
+    private Double[] sig_cfft_rec2(Double[] s1Temp, double rrk) {
         Complex[] s = MathHelper.ccft(s1Temp);
         int K = s1Temp.length;
-        int rr = Math.round(K * rrk);
+        int rr = (int) Math.round(K * rrk);
         for (int k = rr; k <= K - 1 - rr; k++) {
             s[k] = new Complex(0);
         }
-        for (int k = 0; k <= rr - 1; k++) {
+        for (int k = 0; k < rr; k++) {
+            // todo: this
+//            gr = G1[(k*100/rr)];
             int gr = 1;
             s[k] = s[k].multiply(gr);
             s[K - 1 - k] = s[K - 1 - k].multiply(gr);
-//            gr = G1[(k*100/rr)];
         }
         Complex[] s1 = MathHelper.iccft(s1Temp);
 
