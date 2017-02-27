@@ -11,13 +11,15 @@ import java.util.List;
 
 public class Ogibs {
 
-    private static void g1(int scale, int shift) {
-        // todo: check this
-        int mean = 5;
-        Gaussian gaussian = new Gaussian(mean, 0.7);
-        for (int i = 0; i <= mean * 2; i++) {
-            System.out.println(i + " = " + gaussian.value(i));
+    private static double[] G1;
 
+    private static void g1(int mean, int sigma) {
+        Gaussian gaussian = new Gaussian(1, mean / 2, sigma);
+        int scale2 = mean / 2;
+        G1 = new double[scale2];
+        G1[scale2 - 1] = 0;
+        for (int n = 0; n < scale2; n++) {
+            G1[n] = gaussian.value(n + scale2);
         }
     }
 
@@ -183,11 +185,11 @@ public class Ogibs {
 
     private double[] get_phase(Double[] array) {
         int N = array.length;
-        Complex[] S = MathHelper.ccft(array);
+        Complex[] S = MathHelper.cfft(array);
         for (int i = N / 2; i <= N - 1; i++) {
             S[i] = new Complex(0);
         }
-        Complex[] sig = MathHelper.iccft(S);
+        Complex[] sig = MathHelper.icfft(S);
         List<Double> sig_sin = FunctionHelper.Re(sig);
         List<Double> sig_cos = FunctionHelper.Im(sig);
 
@@ -201,20 +203,18 @@ public class Ogibs {
     }
 
     private Double[] sig_cfft_rec2(Double[] s1Temp, double rrk) {
-        Complex[] s = MathHelper.ccft(s1Temp);
+        Complex[] s = MathHelper.cfft(s1Temp);
         int K = s1Temp.length;
         int rr = (int) Math.round(K * rrk);
-        for (int k = rr; k <= K - 1 - rr; k++) {
+        for (int k = rr; k < K - rr; k++) {
             s[k] = new Complex(0);
         }
         for (int k = 0; k < rr; k++) {
-            // todo: this
-//            gr = G1[(k*100/rr)];
-            int gr = 1;
+            double gr = G1[(k*100/rr)];
             s[k] = s[k].multiply(gr);
             s[K - 1 - k] = s[K - 1 - k].multiply(gr);
         }
-        Complex[] s1 = MathHelper.iccft(s1Temp);
+        Complex[] s1 = MathHelper.icfft(s1Temp);
 
         Double[] sRes = new Double[K];
         for (int k = 0; k <= K - 1; k++) {

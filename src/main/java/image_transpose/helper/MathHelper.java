@@ -1,52 +1,42 @@
 package image_transpose.helper;
 
 import org.apache.commons.math3.complex.Complex;
-import org.apache.commons.math3.transform.DftNormalization;
-import org.apache.commons.math3.transform.FastFourierTransformer;
-import org.apache.commons.math3.transform.TransformType;
+import org.jtransforms.fft.DoubleFFT_1D;
 
 import java.util.Arrays;
 
 public final class MathHelper {
-    public static Complex[] ccft(double[] a) {
-        final FastFourierTransformer transformer = new FastFourierTransformer(DftNormalization.UNITARY);
-        return transformer.transform(a, TransformType.INVERSE);
+    public static Complex[] cfft(double[] a) {
+        double[] data = convertToArrayForFft(a);
+        DoubleFFT_1D fft = new DoubleFFT_1D(a.length);
+        fft.complexForward(data);
+        return convertFftResultToComplex(data);
     }
 
-    public static Complex[] iccft(double[] a) {
-        final FastFourierTransformer transformer = new FastFourierTransformer(DftNormalization.UNITARY);
-        return transformer.transform(a, TransformType.FORWARD);
+    public static Complex[] icfft(double[] a) {
+        double[] data = convertToArrayForFft(a);
+        DoubleFFT_1D fft = new DoubleFFT_1D(a.length);
+        fft.realInverse(data, false);
+        return convertFftResultToComplex(data);
     }
 
-    public static Complex[] ccft(int[] a) {
+    public static Complex[] icfft(Double[] a) {
         double[] doubles = Arrays.stream(a).mapToDouble(v -> v).toArray();
-        return ccft(doubles);
+        return icfft(doubles);
     }
 
-    public static Complex[] ccft(Integer[] a) {
+    public static Complex[] icfft(Complex[] s) {
+        double[] doubles = convertComplexToFftData(s);
+        DoubleFFT_1D fft = new DoubleFFT_1D(s.length);
+        fft.realInverse(doubles, false);
+        return convertFftResultToComplex(doubles);
+    }
+
+    public static Complex[] cfft(Double[] a) {
         double[] doubles = Arrays.stream(a).mapToDouble(v -> v).toArray();
-        return ccft(doubles);
+        return cfft(doubles);
     }
 
-    public static Complex[] iccft(Integer[] a) {
-        double[] doubles = Arrays.stream(a).mapToDouble(v -> v).toArray();
-        return iccft(doubles);
-    }
-
-    public static Complex[] iccft(Double[] a) {
-        double[] doubles = Arrays.stream(a).mapToDouble(v -> v).toArray();
-        return iccft(doubles);
-    }
-
-    public static Complex[] iccft(Complex[] s) {
-        final FastFourierTransformer transformer = new FastFourierTransformer(DftNormalization.UNITARY);
-        return transformer.transform(s, TransformType.FORWARD);
-    }
-
-    public static Complex[] ccft(Double[] a) {
-        double[] doubles = Arrays.stream(a).mapToDouble(v -> v).toArray();
-        return ccft(doubles);
-    }
 
     public static Double[] minus(Double[] a, Double[] b) {
         Double[] res = new Double[a.length];
@@ -73,4 +63,29 @@ public final class MathHelper {
         return res;
     }
 
+    private static double[] convertToArrayForFft(double[] a) {
+        double[] data = new double[a.length * 2];
+        for (int i = 0; i < a.length; i++) {
+            data[2 * i] = a[i];
+            data[2 * i + 1] = 0;
+        }
+        return data;
+    }
+
+    private static Complex[] convertFftResultToComplex(double[] data) {
+        Complex[] result = new Complex[data.length / 2];
+        for (int i = 0; i < data.length / 2; i++) {
+            result[i] = new Complex(data[2 * i], data[2 * i + 1]);
+        }
+        return result;
+    }
+
+    private static double[] convertComplexToFftData(Complex[] data) {
+        double[] result = new double[data.length * 2];
+        for (int i = 0; i < data.length; i++) {
+            result[2 * i] = data[i].getArgument();
+            result[2 * i + 1] = data[i].getImaginary();
+        }
+        return result;
+    }
 }
