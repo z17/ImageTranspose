@@ -3,6 +3,11 @@ package image_transpose.helper;
 import org.apache.commons.math3.complex.Complex;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -69,5 +74,46 @@ public final class FunctionHelper {
 
     public static <T> int rows(T[][] matrix) {
         return matrix.length;
+    }
+
+    public static List<Double> readDoublesList(final String name) {
+        try {
+            final List<String> strings = Files.readAllLines(Paths.get(name));
+            final List<Double> result = new ArrayList<>();
+            for (String s : strings) {
+                if (s.isEmpty()) {
+                    continue;
+                }
+
+                result.add(Double.valueOf(s));
+            }
+            return result;
+        } catch (IOException e) {
+            throw new RuntimeException("Cant read file " + name, e);
+        }
+    }
+    public static void checkOutputFolders(final String output) {
+        try {
+            Files.createDirectories(Paths.get(output));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void writeDoublesList(final String name, double[] data) {
+        List<String> lines = new ArrayList<>();
+        StringBuilder stringBuilder = new StringBuilder();
+        for (double d : data) {
+            stringBuilder
+                    .append(d)
+                    .append(System.lineSeparator());
+        }
+
+        lines.add(stringBuilder.toString());
+        try {
+            Files.write(Paths.get(name), lines, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -3,7 +3,6 @@ package image_transpose;
 import image_transpose.helper.BmpHelper;
 import image_transpose.helper.FunctionHelper;
 import image_transpose.helper.MathHelper;
-import org.apache.commons.math3.analysis.function.Gaussian;
 import org.apache.commons.math3.complex.Complex;
 
 import java.util.Arrays;
@@ -11,16 +10,19 @@ import java.util.List;
 
 public class Ogibs {
 
-    private static double[] G1;
+    private static List<Double> G1;
 
     private static void g1(int mean, int sigma) {
-        Gaussian gaussian = new Gaussian(1, mean / 2, sigma);
-        int scale2 = mean / 2;
-        G1 = new double[scale2];
-        G1[scale2 - 1] = 0;
-        for (int n = 0; n < scale2; n++) {
-            G1[n] = gaussian.value(n + scale2);
-        }
+//        Gaussian gaussian = new Gaussian(1, mean / 2, sigma);
+//        int scale2 = mean / 2;
+//        G1 = new double[scale2];
+//        G1[scale2 - 1] = 0;
+//        for (int n = 0; n < scale2; n++) {
+//            G1[n] = gaussian.value(n + scale2);
+//        }
+
+        G1 = FunctionHelper.readDoublesList("g1_file.txt");
+
     }
 
     public static void main(String[] args) {
@@ -30,9 +32,7 @@ public class Ogibs {
 
         ogibs.getOgibs(
                 "tmp/outpilot1_/",
-                "tmp/outpilot1__/",
-                "tmp/outpilot1__b/",
-                "tmp/outpilot1__ph/",
+                "tmp/my_result/",
                 0,
                 14,
                 64,
@@ -47,9 +47,7 @@ public class Ogibs {
 
     public void getOgibs(
             String dirt,
-            String dirt2,
-            String dirt2b,
-            String dirt2ph,
+            String outFolder,
             int num,
             int mean1,
             int mean2,
@@ -60,6 +58,7 @@ public class Ogibs {
             double rrkb,
             double rrkb2
     ) {
+        FunctionHelper.checkOutputFolders(outFolder);
         String name = dirt + num + ".bmp";
         System.err.println("reading " + name);
         Double[][] r = FunctionHelper.convertToDouble(BmpHelper.readFileRed(name));
@@ -145,17 +144,17 @@ public class Ogibs {
         }
 
         Pixel[][] rgb1 = BmpHelper.convertToPixels(r1, g1, b1);
-        String name1 = dirt2 + num + "___test.bmp";
+        String name1 = outFolder + num + "___test1.bmp";
         System.out.println("saving " + name1);
         BmpHelper.writeFile(name1, rgb1);
 
         Pixel[][] rgb2 = BmpHelper.convertToPixels(r1b, g1b, b1b);
-        String name2 = dirt2b + num + "___test.bmp";
+        String name2 = outFolder + num + "___test2.bmp";
         System.out.println("saving " + name2);
         BmpHelper.writeFile(name2, rgb2);
 
         Pixel[][] rgb3 = BmpHelper.convertToPixels(r1ph, g1ph, b1ph);
-        String name3 = dirt2ph + num + "___test.bmp";
+        String name3 = outFolder + num + "___test3.bmp";
         System.out.println("saving " + name3);
         BmpHelper.writeFile(name3, rgb3);
     }
@@ -210,7 +209,7 @@ public class Ogibs {
             s[k] = new Complex(0);
         }
         for (int k = 0; k < rr; k++) {
-            double gr = G1[(k*100/rr)];
+            double gr = G1.get(k * 100 / rr);
             s[k] = s[k].multiply(gr);
             s[K - 1 - k] = s[K - 1 - k].multiply(gr);
         }

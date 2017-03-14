@@ -1,9 +1,8 @@
 package image_transpose;
 
 
+import image_transpose.helper.FunctionHelper;
 import org.jtransforms.fft.DoubleFFT_1D;
-import org.jtransforms.fft.DoubleFFT_2D;
-import org.jtransforms.fft.RealFFTUtils_2D;
 
 import java.util.Arrays;
 
@@ -28,10 +27,19 @@ public class Main {
         {
             double[] data = new double[]{1, 2, 3};
 
-            DoubleFFT_1D df1 = new DoubleFFT_1D(data.length );
+            DoubleFFT_1D df1 = new DoubleFFT_1D(data.length);
             df1.realForward(data);
             System.out.println(Arrays.toString(data));
         }
 
+
+        double[] data = new double[1025];
+        for (int i = 0; i < 1025; i++) {
+            data[i] = (Math.cos(i) * 2 * Math.PI / 100);
+        }
+
+        DoubleFFT_1D df1 = new DoubleFFT_1D(data.length);
+        df1.realForward(data);
+        FunctionHelper.writeDoublesList("fft.txt", data);
     }
 }
