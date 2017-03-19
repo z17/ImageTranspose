@@ -9,7 +9,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.OptionalDouble;
 import java.util.function.Function;
 
 public class BmpHelper {
@@ -22,6 +24,7 @@ public class BmpHelper {
         return result;
     }
 
+    @SuppressWarnings("ConstantConditions")
     public static Pixel[][] readFile(final String name) {
         try {
             BufferedImage image = ImageIO.read(new File(name));
@@ -106,6 +109,86 @@ public class BmpHelper {
         }
     }
 
+    public static void writeBmp(final String name, final int[][] matrix) {
+
+        int[] preparedArray = new int[matrix.length * matrix[0].length];
+
+        int index = 0;
+        for (int[] aMatrix : matrix) {
+            for (int value : aMatrix) {
+                preparedArray[index] = value;
+                index++;
+            }
+        }
+
+        BufferedImage img = new BufferedImage(matrix[0].length, matrix.length, BufferedImage.TYPE_BYTE_GRAY);
+        img.getRaster().setPixels(0, 0, matrix[0].length, matrix.length, preparedArray);
+
+        try {
+            ImageIO.write(img, "BMP", new File(name));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static double[][] normalizeBmp(double[][] matrix) {
+        double min = matrix[0][0];
+        double max = matrix[0][0];
+        for (double[] aMatrix : matrix) {
+            OptionalDouble tMin = Arrays.stream(aMatrix).min();
+            OptionalDouble tMax = Arrays.stream(aMatrix).max();
+            if (!tMin.isPresent() || !tMax.isPresent()) {
+                throw new RuntimeException("Error min/max value finding");
+            }
+            if (tMin.getAsDouble() < min) {
+                min = tMin.getAsDouble();
+            }
+            if (tMax.getAsDouble() < max) {
+                max = tMax.getAsDouble();
+            }
+        }
+        System.err.println(max);
+        System.err.println(min);
+        double[][] result = new double[matrix.length][matrix[0].length];
+        double coefficient = ((double) max - min) / 255;
+        for (int i = 0; i < matrix.length; i++) {
+            for(int j = 0; j < matrix[0].length; j++) {
+                result[i][j] = (int) Math.round((matrix[i][j] - min) / coefficient);
+            }
+        }
+        return result;
+    }
+
+    public static double[][] copyMatrix(final double[][] matrix) {
+        double[][] result = new double[matrix.length][];
+        for (int i = 0; i < matrix.length; i++) {
+            result[i] = Arrays.copyOf(matrix[i], matrix[i].length);
+        }
+        return result;
+    }
+
+    public static void writeBmp(final String name, final double[][] matrix) {
+
+        double[] preparedArray = new double[matrix.length * matrix[0].length];
+
+        int index = 0;
+        for (double[] aMatrix : matrix) {
+            for (Double value : aMatrix) {
+                preparedArray[index] = value;
+                index++;
+            }
+        }
+
+        BufferedImage img = new BufferedImage(matrix[0].length, matrix.length, BufferedImage.TYPE_BYTE_GRAY);
+        img.getRaster().setPixels(0, 0, matrix[0].length, matrix.length, preparedArray);
+
+        try {
+            ImageIO.write(img, "BMP", new File(name));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private enum Color {
         R(Pixel::getR),
         G(Pixel::getG),
@@ -118,7 +201,7 @@ public class BmpHelper {
         }
     }
 
-    public static Pixel[][] convertToPixels(Double[][] r, Double[][] g, Double[][] b) {
+    public static Pixel[][] convertToPixels(double[][] r, double[][] g, double[][] b) {
         int cols = FunctionHelper.cols(r);
         int rows = FunctionHelper.rows(r);
 
@@ -128,9 +211,9 @@ public class BmpHelper {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 res[i][j] = new Pixel(
-                        r[i][j].intValue(),
-                        g[i][j].intValue(),
-                        b[i][j].intValue()
+                        (int) Math.round(r[i][j]),
+                        (int) Math.round(g[i][j]),
+                        (int) Math.round(b[i][j])
                 );
             }
         }

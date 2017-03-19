@@ -35,11 +35,14 @@ public class Main {
 
         double[] data = new double[1025];
         for (int i = 0; i < 1025; i++) {
-            data[i] = (Math.cos(i) * 2 * Math.PI / 100);
+            data[i] = (Math.cos(i * 2 * Math.PI / 300)) + (Math.cos(i * 2 * Math.PI / 20));
         }
 
+        FunctionHelper.writeDoublesList("input.txt", data);
         DoubleFFT_1D df1 = new DoubleFFT_1D(data.length);
         df1.realForward(data);
-        FunctionHelper.writeDoublesList("fft.txt", data);
+        FunctionHelper.writeDoublesList("cfft.txt", data);
+        df1.realInverse(data, true);
+        FunctionHelper.writeDoublesList("icfft.txt", data);
     }
 }

@@ -51,11 +51,11 @@ public final class FunctionHelper {
         return array.stream().reduce(0D, (a, b) -> a + b) / array.size();
     }
 
-    public static Double[][] convertToDouble(Integer[][] array) {
+    public static double[][] convertToDouble(Integer[][] array) {
         int cols = cols(array);
         int rows = rows(array);
 
-        Double[][] res = new Double[rows][cols];
+        double[][] res = new double[rows][cols];
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 res[i][j] = array[i][j].doubleValue();
@@ -73,6 +73,18 @@ public final class FunctionHelper {
     }
 
     public static <T> int rows(T[][] matrix) {
+        return matrix.length;
+    }
+
+    public static int cols(double[][] matrix) {
+        long count = Arrays.stream(matrix).map(array -> array.length).distinct().count();
+        if (count > 1) {
+            throw new IllegalArgumentException("Not a matrix");
+        }
+        return matrix[0].length;
+    }
+
+    public static int rows(double[][] matrix) {
         return matrix.length;
     }
 

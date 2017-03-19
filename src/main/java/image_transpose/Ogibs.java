@@ -61,18 +61,18 @@ public class Ogibs {
         FunctionHelper.checkOutputFolders(outFolder);
         String name = dirt + num + ".bmp";
         System.err.println("reading " + name);
-        Double[][] r = FunctionHelper.convertToDouble(BmpHelper.readFileRed(name));
-        Double[][] g = FunctionHelper.convertToDouble(BmpHelper.readFileGreen(name));
-        Double[][] b = FunctionHelper.convertToDouble(BmpHelper.readFileBlue(name));
-        Double[][] r1 = r.clone();
-        Double[][] g1 = r.clone();
-        Double[][] b1 = r.clone();
-        Double[][] r1b = r.clone();
-        Double[][] g1b = r.clone();
-        Double[][] b1b = r.clone();
-        Double[][] r1ph = r.clone();
-        Double[][] g1ph = r.clone();
-        Double[][] b1ph = r.clone();
+        double[][] r = FunctionHelper.convertToDouble(BmpHelper.readFileRed(name));
+        double[][] g = FunctionHelper.convertToDouble(BmpHelper.readFileGreen(name));
+        double[][] b = FunctionHelper.convertToDouble(BmpHelper.readFileBlue(name));
+        double[][] r1 = r.clone();
+        double[][] g1 = r.clone();
+        double[][] b1 = r.clone();
+        double[][] r1b = r.clone();
+        double[][] g1b = r.clone();
+        double[][] b1b = r.clone();
+        double[][] r1ph = r.clone();
+        double[][] g1ph = r.clone();
+        double[][] b1ph = r.clone();
 
         int X = FunctionHelper.cols(r);
         int YN = FunctionHelper.rows(r);
@@ -81,27 +81,27 @@ public class Ogibs {
                 System.out.println("num = " + num + ", x = " + x + "/" + X);
             }
 
-            Double[] r0 = new Double[YN];
-            Double[] g0 = new Double[YN];
-            Double[] b0 = new Double[YN];
+            double[] r0 = new double[YN];
+            double[] g0 = new double[YN];
+            double[] b0 = new double[YN];
             for (int yn = 0; yn < YN; yn++) {
                 r0[yn] = r[yn][x];
                 g0[yn] = g[yn][x];
                 b0[yn] = b[yn][x];
             }
 
-            List<Double[]> temp1 = get_og2(r0, mean1, mean2, dm1, dm2, rrk, rrkb, rrkb2);
-            Double[] r32 = temp1.get(0);
-            Double[] r32b = temp1.get(1);
-            Double[] r32ph = temp1.get(2);
-            List<Double[]> temp2 = get_og2(g0, mean1, mean2, dm1, dm2, rrk, rrkb, rrkb2);
-            Double[] g32 = temp2.get(0);
-            Double[] g32b = temp2.get(1);
-            Double[] g32ph = temp2.get(2);
-            List<Double[]> temp3 = get_og2(b0, mean1, mean2, dm1, dm2, rrk, rrkb, rrkb2);
-            Double[] b32 = temp3.get(0);
-            Double[] b32b = temp3.get(1);
-            Double[] b32ph = temp3.get(2);
+            List<double[]> temp1 = get_og2(r0, mean1, mean2, dm1, dm2, rrk, rrkb, rrkb2);
+            double[] r32 = temp1.get(0);
+            double[] r32b = temp1.get(1);
+            double[] r32ph = temp1.get(2);
+            List<double[]> temp2 = get_og2(g0, mean1, mean2, dm1, dm2, rrk, rrkb, rrkb2);
+            double[] g32 = temp2.get(0);
+            double[] g32b = temp2.get(1);
+            double[] g32ph = temp2.get(2);
+            List<double[]> temp3 = get_og2(b0, mean1, mean2, dm1, dm2, rrk, rrkb, rrkb2);
+            double[] b32 = temp3.get(0);
+            double[] b32b = temp3.get(1);
+            double[] b32ph = temp3.get(2);
 
             for (int yn = 0; yn < YN; yn++) {
                 double res = r32[yn] * ctrn;
@@ -146,34 +146,34 @@ public class Ogibs {
         Pixel[][] rgb1 = BmpHelper.convertToPixels(r1, g1, b1);
         String name1 = outFolder + num + "___test1.bmp";
         System.out.println("saving " + name1);
-        BmpHelper.writeFile(name1, rgb1);
+        BmpHelper.writeBmp(name1, BmpHelper.normalizeBmp(r1));
 
         Pixel[][] rgb2 = BmpHelper.convertToPixels(r1b, g1b, b1b);
         String name2 = outFolder + num + "___test2.bmp";
         System.out.println("saving " + name2);
-        BmpHelper.writeFile(name2, rgb2);
+        BmpHelper.writeBmp(name2, BmpHelper.normalizeBmp(r1b));
 
         Pixel[][] rgb3 = BmpHelper.convertToPixels(r1ph, g1ph, b1ph);
         String name3 = outFolder + num + "___test3.bmp";
         System.out.println("saving " + name3);
-        BmpHelper.writeFile(name3, rgb3);
+        BmpHelper.writeBmp(name3, BmpHelper.normalizeBmp(r1ph));
     }
 
-    private List<Double[]> get_og2(Double[] s1Temp, int mean1, int mean2, int dm1, int dm2, double rrk, double rrkb, double rrkb2) {
+    private List<double[]> get_og2(double[] s1Temp, int mean1, int mean2, int dm1, int dm2, double rrk, double rrkb, double rrkb2) {
         int N = s1Temp.length;
-        Double[] s1 = sig_cfft_rec2(s1Temp, rrk);
-        Double[] sm1 = sig_cfft_rec2(s1Temp, rrkb);
+        double[] s1 = sig_cfft_rec2(s1Temp, rrk);
+        double[] sm1 = sig_cfft_rec2(s1Temp, rrkb);
 
-        Double[] s2 = new Double[N];
+        double[] s2 = new double[N];
         for (int n = 0; n <= N - 1; n++) {
             s2[n] = 1.55 * Math.abs(s1[n] - sm1[n]);
         }
 
-        Double[] s32 = sig_cfft_rec2(s2, rrkb2);
+        double[] s32 = sig_cfft_rec2(s2, rrkb2);
 
-        Double[] s3 = MathHelper.minus(s1, sm1);
+        double[] s3 = MathHelper.minus(s1, sm1);
 
-        Double[] ph = new Double[s3.length];
+        double[] ph = new double[s3.length];
         double[] phase = get_phase(s3);
         for (int i = 0; i < s3.length; i++) {
             ph[i] = (phase[i] + Math.PI) / 2 * Math.PI * 255;
@@ -182,13 +182,13 @@ public class Ogibs {
 
     }
 
-    private double[] get_phase(Double[] array) {
+    private double[] get_phase(double[] array) {
         int N = array.length;
-        Complex[] S = MathHelper.cfft(array);
+        Complex[] S = MathHelper.cfftComplex(array);
         for (int i = N / 2; i <= N - 1; i++) {
             S[i] = new Complex(0);
         }
-        Complex[] sig = MathHelper.icfft(S);
+        Complex[] sig = MathHelper.icfftComplex(S);
         List<Double> sig_sin = FunctionHelper.Re(sig);
         List<Double> sig_cos = FunctionHelper.Im(sig);
 
@@ -201,23 +201,28 @@ public class Ogibs {
         return f;
     }
 
-    private Double[] sig_cfft_rec2(Double[] s1Temp, double rrk) {
-        Complex[] s = MathHelper.cfft(s1Temp);
+    private double[] sig_cfft_rec2(double[] s1Temp, double rrk) {
+//        FunctionHelper.writeDoublesList("test1_input.txt", s1Temp);
+        double[] s = MathHelper.cfft(s1Temp);
+//        FunctionHelper.writeDoublesList("test1_cfft.txt", s);
         int K = s1Temp.length;
         int rr = (int) Math.round(K * rrk);
         for (int k = rr; k < K - rr; k++) {
-            s[k] = new Complex(0);
+            s[k] = 0;
         }
         for (int k = 0; k < rr; k++) {
             double gr = G1.get(k * 100 / rr);
-            s[k] = s[k].multiply(gr);
-            s[K - 1 - k] = s[K - 1 - k].multiply(gr);
+            s[k] = s[k] * gr;
+            s[K - 1 - k] = s[K - 1 - k] * gr;
         }
-        Complex[] s1 = MathHelper.icfft(s1Temp);
+//        FunctionHelper.writeDoublesList("test1_cfft_rrk.txt", s);
+        double[] s1 = MathHelper.icfft(s);
 
-        Double[] sRes = new Double[K];
+//        FunctionHelper.writeDoublesList("test1_icfft_rrk.txt", s);
+//        System.exit(1);
+        double[] sRes = new double[K];
         for (int k = 0; k <= K - 1; k++) {
-            double res = s1[k].abs();
+            double res = Math.abs(s1[k]);
             sRes[k] = res;
         }
 
