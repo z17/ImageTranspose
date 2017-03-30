@@ -33,7 +33,7 @@ public class Ogibs {
         ogibs.getOgibs(
                 "tmp/outpilot1_/",
                 "tmp/my_result/",
-                0,
+                140,
                 14,
                 64,
                 2,
@@ -146,17 +146,20 @@ public class Ogibs {
         Pixel[][] rgb1 = BmpHelper.convertToPixels(r1, g1, b1);
         String name1 = outFolder + num + "___test1.bmp";
         System.out.println("saving " + name1);
-        BmpHelper.writeBmp(name1, BmpHelper.normalizeBmp(r1));
+//        BmpHelper.writeBmp(name1, BmpHelper.normalizeBmp(r1));
+        BmpHelper.writeBmp(name1, rgb1);
 
         Pixel[][] rgb2 = BmpHelper.convertToPixels(r1b, g1b, b1b);
         String name2 = outFolder + num + "___test2.bmp";
         System.out.println("saving " + name2);
-        BmpHelper.writeBmp(name2, BmpHelper.normalizeBmp(r1b));
+//        BmpHelper.writeBmp(name2, BmpHelper.normalizeBmp(r1b));
+        BmpHelper.writeBmp(name2, rgb2);
 
         Pixel[][] rgb3 = BmpHelper.convertToPixels(r1ph, g1ph, b1ph);
         String name3 = outFolder + num + "___test3.bmp";
         System.out.println("saving " + name3);
-        BmpHelper.writeBmp(name3, BmpHelper.normalizeBmp(r1ph));
+//        BmpHelper.writeBmp(name3, BmpHelper.normalizeBmp(r1ph));
+        BmpHelper.writeBmp(name3, rgb3);
     }
 
     private List<double[]> get_og2(double[] s1Temp, int mean1, int mean2, int dm1, int dm2, double rrk, double rrkb, double rrkb2) {
@@ -202,9 +205,9 @@ public class Ogibs {
     }
 
     private double[] sig_cfft_rec2(double[] s1Temp, double rrk) {
-//        FunctionHelper.writeDoublesList("test1_input.txt", s1Temp);
+        FunctionHelper.writeDoublesList("test1_input.txt", s1Temp);
         double[] s = MathHelper.cfft(s1Temp);
-//        FunctionHelper.writeDoublesList("test1_cfft.txt", s);
+        FunctionHelper.writeDoublesList("test1_cfft.txt", s);
         int K = s1Temp.length;
         int rr = (int) Math.round(K * rrk);
         for (int k = rr; k < K - rr; k++) {
@@ -213,13 +216,13 @@ public class Ogibs {
         for (int k = 0; k < rr; k++) {
             double gr = G1.get(k * 100 / rr);
             s[k] = s[k] * gr;
-            s[K - 1 - k] = s[K - 1 - k] * gr;
+//            s[K - 1 - k] = s[K - 1 - k] * gr;
         }
-//        FunctionHelper.writeDoublesList("test1_cfft_rrk.txt", s);
+        FunctionHelper.writeDoublesList("test1_cfft_rrk.txt", s);
         double[] s1 = MathHelper.icfft(s);
 
-//        FunctionHelper.writeDoublesList("test1_icfft_rrk.txt", s);
-//        System.exit(1);
+        FunctionHelper.writeDoublesList("test1_icfft_rrk.txt", s);
+        System.exit(1);
         double[] sRes = new double[K];
         for (int k = 0; k <= K - 1; k++) {
             double res = Math.abs(s1[k]);

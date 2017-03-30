@@ -189,6 +189,31 @@ public class BmpHelper {
         }
     }
 
+
+    public static void writeBmp(final String name, final Pixel[][] matrix) {
+
+        int[] preparedArray = new int[matrix.length * matrix[0].length * 3];
+
+        int index = 0;
+        for (Pixel[] aMatrix : matrix) {
+            for (Pixel value : aMatrix) {
+                preparedArray[index] = value.getR();
+                preparedArray[index + 1] = value.getG();
+                preparedArray[index + 2] = value.getB();
+                index+= 3;
+            }
+        }
+
+        BufferedImage img = new BufferedImage(matrix[0].length, matrix.length, BufferedImage.TYPE_3BYTE_BGR);
+        img.getRaster().setPixels(0, 0, matrix[0].length, matrix.length, preparedArray);
+
+        try {
+            ImageIO.write(img, "BMP", new File(name));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private enum Color {
         R(Pixel::getR),
         G(Pixel::getG),
