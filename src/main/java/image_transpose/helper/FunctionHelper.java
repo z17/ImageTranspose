@@ -128,4 +128,12 @@ public final class FunctionHelper {
             throw new RuntimeException(e);
         }
     }
+
+    public static double[][] copyMatrix(final double[][] matrix) {
+        double[][] result = new double[matrix.length][];
+        for (int i = 0; i < matrix.length; i++) {
+            result[i] = Arrays.copyOf(matrix[i], matrix[i].length);
+        }
+        return result;
+    }
 }
