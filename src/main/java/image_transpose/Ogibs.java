@@ -30,7 +30,7 @@ public class Ogibs {
 
         Ogibs ogibs = new Ogibs();
 
-        for (int i = 50; i < 100; i++) {
+           for (int i = 50; i < 100; i++) {
             ogibs.getOgibs(
                     "data/outpilot1_/",
                     "data/my_result1/",
