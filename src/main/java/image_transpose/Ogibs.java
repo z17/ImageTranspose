@@ -31,17 +31,14 @@ public class Ogibs {
         Ogibs ogibs = new Ogibs();
 
         ogibs.getOgibs(
-                "tmp/outpilot1_/",
-                "tmp/my_result/",
+                "data/outpilot1_/",
+                "data/my_result/",
                 140,
-                14,
-                64,
-                2,
-                4,
+                21,
                 60,
-                0.2,
-                0.015,
-                0.005
+                0.07,
+                0.02,
+                0.003
         );
     }
 
@@ -49,11 +46,8 @@ public class Ogibs {
             String dirt,
             String outFolder,
             int num,
-            int mean1,
-            int mean2,
-            int dm1,
-            int dm2,
-            int ctrn,
+            int cntr_sig,
+            int cntr_og,
             double rrk,
             double rrkb,
             double rrkb2
@@ -67,15 +61,13 @@ public class Ogibs {
         double[][] r1 = FunctionHelper.copyMatrix(r);
         double[][] g1 = FunctionHelper.copyMatrix(r);
         double[][] b1 = FunctionHelper.copyMatrix(r);
-        double[][] r1b = FunctionHelper.copyMatrix(r);
-        double[][] g1b = FunctionHelper.copyMatrix(r);
-        double[][] b1b = FunctionHelper.copyMatrix(r);
-        double[][] r1ph = FunctionHelper.copyMatrix(r);
-        double[][] g1ph = FunctionHelper.copyMatrix(r);
-        double[][] b1ph = FunctionHelper.copyMatrix(r);
+        double[][] r2 = FunctionHelper.copyMatrix(r);
+        double[][] g2 = FunctionHelper.copyMatrix(r);
+        double[][] b2 = FunctionHelper.copyMatrix(r);
 
         int X = FunctionHelper.cols(r);
         int YN = FunctionHelper.rows(r);
+
         for (int x = 0; x <= X - 1; x++) {
             if (x % 20 == 0) {
                 System.out.println("num = " + num + ", x = " + x + "/" + X);
@@ -90,21 +82,18 @@ public class Ogibs {
                 b0[yn] = b[yn][x];
             }
 
-            List<double[]> temp1 = get_og2(r0, mean1, mean2, dm1, dm2, rrk, rrkb, rrkb2);
+            List<double[]> temp1 = get_og3_fst(r0,  rrk, rrkb, rrkb2);
             double[] r32 = temp1.get(0);
-            double[] r32b = temp1.get(1);
-            double[] r32ph = temp1.get(2);
-            List<double[]> temp2 = get_og2(g0, mean1, mean2, dm1, dm2, rrk, rrkb, rrkb2);
+            double[] r3 = temp1.get(1);
+            List<double[]> temp2 = get_og3_fst(g0, rrk, rrkb, rrkb2);
             double[] g32 = temp2.get(0);
-            double[] g32b = temp2.get(1);
-            double[] g32ph = temp2.get(2);
-            List<double[]> temp3 = get_og2(b0, mean1, mean2, dm1, dm2, rrk, rrkb, rrkb2);
+            double[] g3 = temp2.get(1);
+            List<double[]> temp3 = get_og3_fst(b0, rrk, rrkb, rrkb2);
             double[] b32 = temp3.get(0);
-            double[] b32b = temp3.get(1);
-            double[] b32ph = temp3.get(2);
+            double[] b3 = temp3.get(1);
 
             for (int yn = 0; yn < YN; yn++) {
-                double res = r32[yn] * ctrn;
+                double res = 127 + r32[yn] * cntr_sig;
                 if (res < 0) {
                     res = 0;
                 }
@@ -114,7 +103,7 @@ public class Ogibs {
 
                 r1[yn][x] = res;
 
-                res = g32[yn] * ctrn;
+                res = 127 + g32[yn] * cntr_sig;
                 if (res < 0) {
                     res = 0;
                 }
@@ -124,7 +113,7 @@ public class Ogibs {
 
                 g1[yn][x] = res;
 
-                res = b32[yn] * ctrn;
+                res = 127 + b32[yn] * cntr_sig;
                 if (res < 0) {
                     res = 0;
                 }
@@ -132,34 +121,47 @@ public class Ogibs {
                     res = 255;
                 }
 
-                b1[yn][x] = res;
+                res = 127 + r3[yn] * cntr_sig;
+                if (res < 0) {
+                    res = 0;
+                }
+                if (res > 255) {
+                    res = 255;
+                }
 
-                r1b[yn][x] = r32b[yn];
-                g1b[yn][x] = g32b[yn];
-                b1b[yn][x] = b32b[yn];
-                r1ph[yn][x] = r32ph[yn];
-                g1ph[yn][x] = g32ph[yn];
-                b1ph[yn][x] = b32ph[yn];
+                r2[yn][x] = res;
+
+                res = 127 + g3[yn] * cntr_sig;
+                if (res < 0) {
+                    res = 0;
+                }
+                if (res > 255) {
+                    res = 255;
+                }
+
+                g2[yn][x] = res;
+
+                res = 127 + b3[yn] * cntr_sig;
+                if (res < 0) {
+                    res = 0;
+                }
+                if (res > 255) {
+                    res = 255;
+                }
+
+                b2[yn][x] = res;
             }
         }
 
-        Pixel[][] rgb1 = BmpHelper.convertToPixels(r, g, b);
+        Pixel[][] rgb1 = BmpHelper.convertToPixels(r1, g1, b1);
         String name1 = outFolder + num + "___test1.bmp";
         System.out.println("saving " + name1);
-//        BmpHelper.writeBmp(name1, BmpHelper.normalizeBmp(r1));
         BmpHelper.writeBmp(name1, rgb1);
 
-        Pixel[][] rgb2 = BmpHelper.convertToPixels(r1, g1, b1);
+        Pixel[][] rgb2 = BmpHelper.convertToPixels(r2, g2, b2);
         String name2 = outFolder + num + "___test2.bmp";
         System.out.println("saving " + name2);
-//        BmpHelper.writeBmp(name2, BmpHelper.normalizeBmp(r1b));
         BmpHelper.writeBmp(name2, rgb2);
-
-        Pixel[][] rgb3 = BmpHelper.convertToPixels(r1ph, g1ph, b1ph);
-        String name3 = outFolder + num + "___test3.bmp";
-        System.out.println("saving " + name3);
-//        BmpHelper.writeBmp(name3, BmpHelper.normalizeBmp(r1ph));
-        BmpHelper.writeBmp(name3, rgb3);
 
         System.err.println("Complete!");
     }
@@ -185,6 +187,24 @@ public class Ogibs {
         }
         return Arrays.asList(s32, sm1, ph);
 
+    }
+
+
+    private List<double[]> get_og3_fst(double[] s1Temp, double rrk, double rrkb, double rrkb2) {
+        int N = s1Temp.length;
+        double[] s1 = sig_cfft_rec2(s1Temp, rrk);
+        double[] sm1 = sig_cfft_rec2(s1Temp, rrkb);
+
+        double[] s2 = new double[N];
+        for (int n = 0; n <= N - 1; n++) {
+            s2[n] = 1.55 * Math.abs(s1[n] - sm1[n]);
+        }
+
+        double[] s32 = sig_cfft_rec2(s2, rrkb2);
+
+        double[] s3 = MathHelper.minus(s1, sm1);
+
+        return Arrays.asList(s3, s32);
     }
 
     private double[] get_phase(double[] array) {
