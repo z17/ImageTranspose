@@ -25,11 +25,11 @@ public final class TransposeHelper {
     }
 
     public static void main(String[] args) {
-        final String folderName = "tmp/outPilot1";
+        final String folderName = "data/outPilot1";
 
         List<String> names = FunctionHelper.getAllImages(folderName);
 
-        names = names.subList(0, 1000);
+        names = names.subList(0, 100);
         List<Pixel[][]> pixels = BmpHelper.readFiles(names);
         List<Pixel[][]> transpose = TransposeHelper.transpose(pixels);
         transpose = TransposeHelper.transpose(transpose);
